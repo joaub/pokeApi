@@ -4,59 +4,49 @@ import {useEffect, useState} from 'react';
 
 function App() {
 
-  let [pokemones, setPokemones] = useState([]);
+  let [pokemon, setPokemon] = useState(null);
+  const [pokemonId, setPokemonId] = useState(1);
   
 
+  const getPokemon = async (id) => {
+    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    const poke = await response.json();
+    setPokemon({
+      id: poke.id,
+      name: poke.name,
+      img: poke.sprites.other.dream_world.front_default,
+    });
+  };
+
+  
   useEffect(() => {
-    const getPokemones = async() =>{
-      const response = await fetch(  "https://pokeapi.co/api/v2/pokemon ")
-      const listaPokemones = await response.json()
-      const {results} = listaPokemones
-      
-      const newPokemones = results.map(async (pokemon) =>{
-        const response = await fetch(pokemon.url)
-        const poke = await response.json()
+    getPokemon(pokemonId);
+  }, [pokemonId]); 
 
-        return{
-          id:poke.id,
-          name:poke.name,
-          img: poke.sprites.other.dream_world.front_default
-        }
-      })
-      setPokemones(await Promise.all(newPokemones))
-    }
-    
-    getPokemones()
-      
-  }, [])
+  // Función para cambiar al siguiente Pokémon
+  const nextPokemon = () => {
+    setPokemonId((prevId) => prevId + 1); 
+  };
 
-  
 
   return (
     <>
-      <div >
-        <h1>pokedex</h1>
-        <>
-        {
-            Array.isArray(pokemones) && pokemones.map((pokemon, index) => (
-              // eslint-disable-next-line react/jsx-key
-              <div >
-                <img src={pokemon.img} alt={pokemon.name}/>
-                <p key={index}>{pokemon.id}</p>
-                <div key={index}>{pokemon.name}</div>
-                
-                
-              </div>
-              
-            ))
-          }
-        </>
-        
-        
-        
+      <div>
+        <h1>Pokedex</h1>
+        {pokemon ? (
+          <div>
+            <img src={pokemon.img} alt={pokemon.name} />
+            <p>{pokemon.id}</p>
+            <div>{pokemon.name}</div>
+            <button onClick={nextPokemon}>Siguiente Pokémon</button>
+          </div>
+        ) : (
+          <p>Cargando Pokémon...</p>
+        )}
       </div>
     </>
-  )
+  );
+
 }
 
 export default App
